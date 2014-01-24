@@ -27,6 +27,9 @@
 
 typedef void (^TMDiskCacheBlock)(TMDiskCache *cache);
 typedef void (^TMDiskCacheObjectBlock)(TMDiskCache *cache, NSString *key, id <NSCoding> object, NSURL *fileURL);
+typedef BOOL (^TMDiskCacheEncodingBlock)(id <NSCoding> object, NSURL *fileURL);
+typedef id <NSCoding> (^TMDiskCacheDecodingBlock)(NSURL *fileURL);
+
 
 @interface TMDiskCache : NSObject
 
@@ -78,6 +81,18 @@ typedef void (^TMDiskCacheObjectBlock)(TMDiskCache *cache, NSString *key, id <NS
  @warning Do not read this property on the <sharedQueue> (including asynchronous method blocks).
  */
 @property (assign) NSTimeInterval ageLimit;
+
+#pragma mark -
+/// @name Encoding/Decoding blocks
+/**
+ A block that will write the given object to disk at the provided URL. If not set, NSKeyedArchiver is used.
+ */
+@property (copy) TMDiskCacheEncodingBlock encodingBlock;
+
+/**
+ A block that will make an object from data at the provided URL. If not set, NSKeyedUnarchiver is used.
+ */
+@property (copy) TMDiskCacheDecodingBlock decodingBlock;
 
 #pragma mark -
 /// @name Event Blocks
