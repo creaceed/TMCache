@@ -82,6 +82,11 @@ typedef id <NSCoding> (^TMDiskCacheDecodingBlock)(NSURL *fileURL);
  */
 @property (assign) NSTimeInterval ageLimit;
 
+/**
+ Characters that should be escaped when making filename from cache key. Defaults is ".:/"
+ */
+@property (copy) NSString *escapedCharacters;
+
 #pragma mark -
 /// @name Encoding/Decoding blocks
 /**
@@ -164,7 +169,7 @@ typedef id <NSCoding> (^TMDiskCacheDecodingBlock)(NSURL *fileURL);
 - (instancetype)initWithName:(NSString *)name;
 
 /**
- The designated initializer. Multiple instances with the same name are allowed and can safely access
+ Multiple instances with the same name are allowed and can safely access
  the same data on disk thanks to the magic of seriality.
  
  @see name
@@ -173,6 +178,18 @@ typedef id <NSCoding> (^TMDiskCacheDecodingBlock)(NSURL *fileURL);
  @result A new cache with the specified name.
  */
 - (instancetype)initWithName:(NSString *)name rootPath:(NSString *)rootPath;
+
+/**
+ The designated initializer. Multiple instances with the same name are allowed and can safely access
+ the same data on disk thanks to the magic of seriality.
+ 
+ @see name
+ @param name The name of the cache.
+ @param rootPath The path of the cache.
+ @param prefix The prefix that's prepended to cache name. If nil, the default value is used (com.tumblr.TMDiskCache)
+ @result A new cache with the specified name.
+ */
+- (instancetype)initWithName:(NSString *)name rootPath:(NSString *)rootPath prefix:(NSString*)prefix;
 
 #pragma mark -
 /// @name Asynchronous Methods

@@ -45,6 +45,10 @@ NSString * const TMDiskCacheSharedName = @"TMDiskCacheShared";
 
 - (instancetype)initWithName:(NSString *)name rootPath:(NSString *)rootPath
 {
+	return [self initWithName:name rootPath:[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0] prefix:nil];
+}
+- (instancetype)initWithName:(NSString *)name rootPath:(NSString *)rootPath prefix:(NSString*)prefix
+{
     if (!name)
         return nil;
 
@@ -63,10 +67,16 @@ NSString * const TMDiskCacheSharedName = @"TMDiskCacheShared";
         _byteLimit = 0;
         _ageLimit = 0.0;
 
+		_escapedCharacters = @".:/";
         _dates = [[NSMutableDictionary alloc] init];
         _sizes = [[NSMutableDictionary alloc] init];
 
-        NSString *pathComponent = [[NSString alloc] initWithFormat:@"%@.%@", TMDiskCachePrefix, _name];
+		NSString *pref = prefix;
+		
+		if(pref == nil)
+			pref = TMDiskCachePrefix;
+		
+        NSString *pathComponent = [[NSString alloc] initWithFormat:@"%@.%@", pref, _name];
         _cacheURL = [NSURL fileURLWithPathComponents:@[ rootPath, pathComponent ]];
 
         __weak TMDiskCache *weakSelf = self;
@@ -133,11 +143,10 @@ NSString * const TMDiskCacheSharedName = @"TMDiskCacheShared";
     if (![string length])
         return @"";
 
-    CFStringRef static const charsToEscape = CFSTR(".:/");
     CFStringRef escapedString = CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
                                                                         (__bridge CFStringRef)string,
                                                                         NULL,
-                                                                        charsToEscape,
+                                                                        (__bridge CFStringRef)self.escapedCharacters,
                                                                         kCFStringEncodingUTF8);
     return (__bridge_transfer NSString *)escapedString;
 }
