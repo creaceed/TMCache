@@ -206,6 +206,11 @@ typedef id <NSCoding> (^TMDiskCacheDecodingBlock)(NSURL *fileURL);
 - (void)objectForKey:(NSString *)key block:(TMDiskCacheObjectBlock)block;
 
 /**
+ This won't mark the resource as accessed (no change to underlying info).
+ */
+- (void)hasObjectForKey:(NSString *)key block:(void(^)(TMDiskCache *cache, NSString *key, BOOL has))block;
+
+/**
  Retrieves the fileURL for the specified key without actually reading the data from disk. This method
  returns immediately and executes the passed block as soon as the object is available on the serial
  <sharedQueue>.
@@ -295,6 +300,11 @@ typedef id <NSCoding> (^TMDiskCacheDecodingBlock)(NSURL *fileURL);
  @result The object for the specified key.
  */
 - (id <NSCoding>)objectForKey:(NSString *)key;
+
+/**
+ This won't mark the resource as accessed (no change to underlying info).
+ */
+- (BOOL)hasObjectForKey:(NSString *)key;
 
 /**
  Retrieves the file URL for the specified key. This method blocks the calling thread until the

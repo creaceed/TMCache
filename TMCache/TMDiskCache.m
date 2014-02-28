@@ -425,6 +425,26 @@ NSString * const TMDiskCacheSharedName = @"TMDiskCacheShared";
     });
 }
 
+- (void)hasObjectForKey:(NSString *)key block:(void(^)(TMDiskCache *cache, NSString *key, BOOL has))block
+{
+    if (!key || !block)
+        return;
+	
+    __weak TMDiskCache *weakSelf = self;
+	
+    dispatch_async(_queue, ^{
+        TMDiskCache *strongSelf = weakSelf;
+        if (!strongSelf)
+            return;
+		
+        NSURL *fileURL = [strongSelf encodedFileURLForKey:key];
+		
+        BOOL has = [[NSFileManager defaultManager] fileExistsAtPath:[fileURL path]];
+		
+        block(strongSelf, key, has);
+    });
+}
+
 - (void)fileURLForKey:(NSString *)key block:(TMDiskCacheObjectBlock)block
 {
     NSDate *now = [[NSDate alloc] init];
@@ -708,6 +728,29 @@ NSString * const TMDiskCacheSharedName = @"TMDiskCacheShared";
     #endif
 
     return objectForKey;
+}
+
+- (BOOL)hasObjectForKey:(NSString *)key
+{
+    if (!key)
+        return NO;
+	
+	__block BOOL res = NO;
+	
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+	
+	[self hasObjectForKey:key block:^(TMDiskCache *cache, NSString *key, BOOL has) {
+		res = has;
+		dispatch_semaphore_signal(semaphore);
+	}];
+    
+    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+	
+#if !OS_OBJECT_USE_OBJC
+    dispatch_release(semaphore);
+#endif
+	
+    return res;
 }
 
 - (NSURL *)fileURLForKey:(NSString *)key
