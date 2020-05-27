@@ -67,7 +67,7 @@ NSString * const TMDiskCacheSharedName = @"TMDiskCacheShared";
         _byteLimit = 0;
         _ageLimit = 0.0;
 
-		_escapedCharacters = @".:/";
+		_escapedCharacters = @".:/%";
         _dates = [[NSMutableDictionary alloc] init];
         _sizes = [[NSMutableDictionary alloc] init];
 
@@ -143,12 +143,8 @@ NSString * const TMDiskCacheSharedName = @"TMDiskCacheShared";
     if (![string length])
         return @"";
 
-    CFStringRef escapedString = CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
-                                                                        (__bridge CFStringRef)string,
-                                                                        NULL,
-                                                                        (__bridge CFStringRef)self.escapedCharacters,
-                                                                        kCFStringEncodingUTF8);
-    return (__bridge_transfer NSString *)escapedString;
+	NSString *encodedString = [string stringByAddingPercentEncodingWithAllowedCharacters:[[NSCharacterSet characterSetWithCharactersInString:self.escapedCharacters] invertedSet]];
+    return encodedString;
 }
 
 - (NSString *)decodedString:(NSString *)string
@@ -156,11 +152,8 @@ NSString * const TMDiskCacheSharedName = @"TMDiskCacheShared";
     if (![string length])
         return @"";
 
-    CFStringRef unescapedString = CFURLCreateStringByReplacingPercentEscapesUsingEncoding(kCFAllocatorDefault,
-                                                                                          (__bridge CFStringRef)string,
-                                                                                          CFSTR(""),
-                                                                                          kCFStringEncodingUTF8);
-    return (__bridge_transfer NSString *)unescapedString;
+	NSString *unescapedString = [string stringByRemovingPercentEncoding];
+    return unescapedString;
 }
 
 #pragma mark - Private Trash Methods -
