@@ -410,7 +410,10 @@ NSString * const TMDiskCacheSharedName = @"TMDiskCacheShared";
             if(self.decodingBlock)
                 object = self.decodingBlock(fileURL);
             else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
                 object = [NSKeyedUnarchiver unarchiveObjectWithFile:[fileURL path]];
+#pragma GCC diagnostic pop
             [strongSelf setFileModificationDate:now forURL:fileURL];
         }
 
@@ -492,7 +495,10 @@ NSString * const TMDiskCacheSharedName = @"TMDiskCacheShared";
         if(self.encodingBlock)
             written = self.encodingBlock(object, fileURL);
         else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
             written = [NSKeyedArchiver archiveRootObject:object toFile:[fileURL path]];
+#pragma GCC diagnostic pop
         
         if (written) {
             [strongSelf setFileModificationDate:now forURL:fileURL];
